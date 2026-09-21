@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WasteWise AI — Know it. Sort it. Dispose right.</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Fixed indicators -->
+<div id="demo-badge" class="demo-badge" title="Demo Mode">DEMO MODE</div>
+<div id="offline-banner" class="offline-banner hidden">📴 <span data-i18n="offline_banner">Limited offline mode</span></div>
+<div id="toast" class="toast hidden"></div>
+
+<!-- ============ 01 SPLASH ============ -->
+<section class="screen active" id="screen-splash">
+  <div class="splash-bg">
+    <div class="particle p1">♻️</div><div class="particle p2">🍌</div>
+    <div class="particle p3">🍾</div><div class="particle p4">🔋</div>
+    <div class="particle p5">📄</div><div class="particle p6">🥫</div>
+    <div class="scan-ring"></div><div class="scan-ring r2"></div>
+  </div>
+  <div class="splash-content">
+    <div class="splash-logo">♻️</div>
+    <h1 class="splash-title">WasteWise <span>AI</span></h1>
+    <p class="splash-tag" data-i18n="tagline">Know it. Sort it. Dispose right.</p>
+    <p class="splash-sub" data-i18n="splash_sub">Point. Ask. Sort correctly.</p>
+    <button class="btn btn-primary btn-xl" id="btn-start" data-i18n="start">▶ START WASTEWISE</button>
+    <div class="splash-links">
+      <button class="link-btn" onclick="go('screen-language')" data-i18n="language">🌐 Language</button>
+      <button class="link-btn" onclick="go('screen-help')" data-i18n="help">❓ Help</button>
+    </div>
+  </div>
+  <p class="splash-foot">SDG 12 · Responsible Consumption &amp; Production</p>
+</section>
+
+<!-- ============ 02 LANGUAGE ============ -->
+<section class="screen" id="screen-language">
+  <header class="topbar"><button class="back" onclick="goBack()">‹</button><h2 data-i18n="choose_language">Choose Language / భాష ఎంచుకోండి / भाषा चुनें</h2></header>
+  <div class="page pad">
+    <button class="lang-card" onclick="setLang('en')">🇬🇧 <b>English</b><span>Default</span></button>
+    <button class="lang-card" onclick="setLang('te')">🇮🇳 <b>తెలుగు</b><span>Telugu</span></button>
+    <button class="lang-card" onclick="setLang('hi')">🇮🇳 <b>हिन्दी</b><span>Hindi</span></button>
+    <p class="hint" data-i18n="lang_hint">Language applies to the entire app — buttons, captions, AI responses and errors.</p>
+  </div>
+</section>
+
+<!-- ============ 03 HOME ============ -->
+<section class="screen" id="screen-home">
+  <header class="topbar">
+    <h2 class="brand">♻️ WasteWise <span>AI</span></h2>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="go('screen-language')">🌐</button>
+      <button class="icon-btn" onclick="go('screen-settings')">⚙️</button>
+    </div>
+  </header>
+  <div class="page pad home">
+    <div class="home-hero">
+      <div class="hero-art">📷🎙️🧠</div>
+      <h1 data-i18n="show_me">Show me what you're sorting.</h1>
+      <p class="muted" data-i18n="home_sub">Point your camera, ask out loud, or type an item.</p>
+    </div>
+    <button class="btn btn-primary btn-xl btn-block" onclick="go('screen-camera')">📷 <span data-i18n="start_camera">START CAMERA</span></button>
+    <div class="home-row">
+      <button class="btn btn-secondary" onclick="go('screen-camera');setTimeout(simListen,600)">🎙 <span data-i18n="ask_wastewise">ASK</span></button>
+      <button class="btn btn-secondary" onclick="go('screen-type')">⌨️ <span data-i18n="type_item">TYPE ITEM</span></button>
+    </div>
+    <button class="link-btn" onclick="go('screen-guide')" data-i18n="open_bin_guide">🗺️ Bin Guide</button>
+    <button class="link-btn" onclick="go('screen-queries')" data-i18n="query_centre_link">💬 Need help? Open Query Centre</button>
+    <div class="loc-pill" id="home-loc">📍 Campus Cafeteria</div>
+  </div>
+  <nav class="bottom-nav" data-nav="home">
+    <button onclick="go('screen-home')" class="nav-on">🏠<span data-i18n="nav_home">Home</span></button>
+    <button onclick="go('screen-camera')">📷<span data-i18n="nav_scan">Scan</span></button>
+    <button onclick="go('screen-guide')">🗺️<span data-i18n="nav_guide">Guide</span></button>
+    <button onclick="go('screen-queries')">❓<span data-i18n="nav_queries">Queries</span></button>
+    <button onclick="go('screen-settings')">⚙️<span data-i18n="nav_settings">Settings</span></button>
+  </nav>
+</section>
+
+<!-- ============ 08/09 CAMERA ============ -->
+<section class="screen screen-full" id="screen-camera">
+  <div class="camera-wrap">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <div class="cam-fallback hidden" id="cam-fallback">
+      <div class="cam-fallback-art">📷🚫</div>
+      <p data-i18n="camera_denied">Camera unavailable.</p>
+      <div class="row-center">
+        <button class="btn btn-secondary" onclick="startCamera()" data-i18n="try_again">Try Again</button>
+        <button class="btn btn-secondary" onclick="go('screen-type')" data-i18n="type_instead">Type Instead</button>
+      </div>
+    </div>
+    <header class="topbar cam-top">
+      <button class="back" onclick="stopCamera();go('screen-home')">‹</button>
+      <h2>♻️ WasteWise <span>AI</span></h2>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="go('screen-language')">🌐</button>
+        <button class="icon-btn" id="btn-cam-mute" onclick="toggleMute()">🔊</button>
+      </div>
+    </header>
+    <div class="scan-area"><div class="scan-corner tl"></div><div class="scan-corner tr"></div><div class="scan-corner bl"></div><div class="scan-corner br"></div><div class="scan-line"></div></div>
+    <div class="cam-hint" id="cam-hint" data-i18n="show_your_waste">Show your waste inside the frame</div>
+    <div class="demo-picker">
+      <label data-i18n="demo_item_label">Demo item:</label>
+      <select id="demo-item" onchange="demoScan(this.value)">
+        <option value="">— select —</option>
+      </select>
+    </div>
+    <div class="ai-status" id="ai-status"><span class="pulse-dot"></span><span id="ai-status-text" data-i18n="status_ready">Ready</span></div>
+    <div class="cam-controls">
+      <button class="cam-btn small" id="btn-voice" onclick="simListen()">🎙️</button>
+      <button class="cam-btn main" id="btn-scan" onclick="demoScan(document.getElementById('demo-item').value||'Banana Peel')">📷</button>
+      <button class="cam-btn small" onclick="stopCamera();go('screen-home')">⏹</button>
+    </div>
+    <!-- caption / conversation panel -->
+    <div class="caption-panel" id="caption-panel">
+      <div id="captions"></div>
+      <div class="follow-row">
+        <button class="icon-btn" onclick="simListen(true)">🎙️</button>
+        <input id="cam-text-input" data-i18n-ph="type_here" placeholder="Type instead…" onkeydown="if(event.key==='Enter')sendFromCamera()">
+        <button class="btn btn-primary btn-s" onclick="sendFromCamera()" data-i18n="send">Send</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEXT FALLBACK ============ -->
+<section class="screen" id="screen-type">
+  <header class="topbar"><button class="back" onclick="go('screen-home')">‹</button><h2 data-i18n="type_item">Type an Item</h2></header>
+  <div class="page pad">
+    <p class="muted" data-i18n="type_sub">Text is the fallback — camera and voice are primary.</p>
+    <div class="follow-row big">
+      <input id="type-input" data-i18n-ph="type_placeholder" placeholder="e.g. old battery, plastic bottle…" onkeydown="if(event.key==='Enter')sendTyped()">
+      <button class="btn btn-primary" onclick="sendTyped()" data-i18n="ask">Ask</button>
+    </div>
+    <div id="type-suggest" class="chips"></div>
+  </div>
+</section>
+
+<!-- ============ 11 RESULT ============ -->
+<section class="screen" id="screen-result">
+  <header class="topbar"><button class="back" onclick="stopCamera();go('screen-home')">‹</button><h2 data-i18n="ai_result">AI Result</h2>
+    <div class="topbar-actions"><button class="icon-btn" onclick="go('screen-language')">🌐</button></div>
+  </header>
+  <div class="page pad" id="result-body"><!-- rendered by JS --></div>
+</section>
+
+<!-- ============ 19 BIN GUIDE ============ -->
+<section class="screen" id="screen-guide">
+  <header class="topbar"><button class="back" onclick="go('screen-home')">‹</button><h2 data-i18n="bin_guide">Bin Guide</h2></header>
+  <div class="page pad">
+    <input class="search" id="guide-search" data-i18n-ph="search_placeholder" placeholder="What are you disposing of?" oninput="renderGuide()">
+    <div id="guide-list"></div>
+  </div>
+  <nav class="bottom-nav" data-nav="guide">
+    <button onclick="go('screen-home')">🏠<span data-i18n="nav_home">Home</span></button>
+    <button onclick="go('screen-camera')">📷<span data-i18n="nav_scan">Scan</span></button>
+    <button onclick="go('screen-guide')" class="nav-on">🗺️<span data-i18n="nav_guide">Guide</span></button>
+    <button onclick="go('screen-queries')">❓<span data-i18n="nav_queries">Queries</span></button>
+    <button onclick="go('screen-settings')">⚙️<span data-i18n="nav_settings">Settings</span></button>
+  </nav>
+</section>
+
+<!-- ============ 22 QUERY CENTRE ============ -->
+<section class="screen" id="screen-queries">
+  <header class="topbar"><button class="back" onclick="go('screen-home')">‹</button><h2 data-i18n="query_centre">Query Centre</h2></header>
+  <div class="page pad">
+    <p class="muted" data-i18n="query_sub">Tell us about wrong answers, local-rule mismatches, or unclear situations.</p>
+    <button class="btn btn-primary btn-block" onclick="openQueryForm()" data-i18n="new_query">＋ New Query</button>
+    <h3 class="sec-title" data-i18n="my_queries">My Queries</h3>
+    <div id="query-list"></div>
+  </div>
+  <nav class="bottom-nav" data-nav="queries">
+    <button onclick="go('screen-home')">🏠<span data-i18n="nav_home">Home</span></button>
+    <button onclick="go('screen-camera')">📷<span data-i18n="nav_scan">Scan</span></button>
+    <button onclick="go('screen-guide')">🗺️<span data-i18n="nav_guide">Guide</span></button>
+    <button onclick="go('screen-queries')" class="nav-on">❓<span data-i18n="nav_queries">Queries</span></button>
+    <button onclick="go('screen-settings')">⚙️<span data-i18n="nav_settings">Settings</span></button>
+  </nav>
+</section>
+
+<!-- ============ 16 SUBMIT QUERY ============ -->
+<section class="screen" id="screen-query-form">
+  <header class="topbar"><button class="back" onclick="go('screen-queries')">‹</button><h2 data-i18n="submit_query">Submit Query</h2></header>
+  <div class="page pad">
+    <label class="fld-label" data-i18n="query_category">Category</label>
+    <select id="q-category">
+      <option>Wrong AI answer</option><option>Local rule mismatch</option><option>Item not recognized</option>
+      <option>Camera issue</option><option>Voice issue</option><option>Language issue</option>
+      <option>Bin issue</option><option>Safety concern</option><option>Improvement suggestion</option><option>Other</option>
+    </select>
+    <label class="fld-label" data-i18n="query_text">Your message</label>
+    <textarea id="q-text" rows="4" placeholder="Describe the issue…"></textarea>
+    <label class="check-row"><input type="checkbox" id="q-attach" checked> <span data-i18n="attach_item">📎 Attach current item &amp; AI answer</span></label>
+    <button class="btn btn-primary btn-block" onclick="submitQuery()" data-i18n="submit_query_btn">SUBMIT QUERY</button>
+  </div>
+</section>
+
+<!-- ============ 17 QUERY SUBMITTED ============ -->
+<section class="screen" id="screen-query-done">
+  <div class="page pad center-page">
+    <div class="big-check">✅</div>
+    <h2 data-i18n="query_done_title">Query submitted.</h2>
+    <p class="muted"><span data-i18n="anon_id">Anonymous Query ID:</span> <b id="query-id">WW-Q-1042</b></p>
+    <p class="muted" data-i18n="query_done_sub">Thank you. Our team will review the local rule and AI answer.</p>
+    <button class="btn btn-primary" onclick="go('screen-home')" data-i18n="back_home">Back to Home</button>
+  </div>
+</section>
+
+<!-- ============ 21 INSIGHTS ============ -->
+<section class="screen" id="screen-insights">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="insights">WasteWise Insights</h2>
+    <div class="topbar-actions"><button class="icon-btn" onclick="go('screen-admin')" title="Admin">🧑‍💼</button></div>
+  </header>
+  <div class="page pad">
+    <div class="demo-note">⚠️ <span data-i18n="demo_data_label">Demo data — replace with pilot measurements.</span></div>
+    <div class="stat-grid" id="insight-cards"></div>
+    <div id="insight-charts"></div>
+    <h3 class="sec-title" data-i18n="suggested_interventions">Suggested interventions</h3>
+    <div class="card"><p>🟡 <span data-i18n="interv1">Plastic wrappers are generating repeated uncertainty in the cafeteria.</span></p>
+    <p>💡 <span data-i18n="interv1b">Consider clearer dry-bin signage.</span></p></div>
+    <div class="card"><p>🟡 <span data-i18n="interv2">Battery queries cluster near the hostel block.</span></p>
+    <p>💡 <span data-i18n="interv2b">Add a labelled Special / Hazardous collection point.</span></p></div>
+    <button class="btn btn-secondary btn-block" onclick="exportCSV()" data-i18n="export_csv">📤 Export anonymous CSV</button>
+  </div>
+</section>
+
+<!-- ============ 22 ADMIN ============ -->
+<section class="screen" id="screen-admin">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="admin_dash">Admin Dashboard</h2></header>
+  <div class="admin-tabs">
+    <button class="atab on" data-tab="overview" onclick="adminTab('overview')">📊 <span data-i18n="tab_overview">Overview</span></button>
+    <button class="atab" data-tab="queries" onclick="adminTab('queries')">❓ <span data-i18n="tab_queries">Queries</span></button>
+    <button class="atab" data-tab="locations" onclick="adminTab('locations')">📍 <span data-i18n="tab_locations">Locations</span></button>
+    <button class="atab" data-tab="bins" onclick="adminTab('bins')">🗑️ <span data-i18n="tab_bins">Bins</span></button>
+    <button class="atab" data-tab="knowledge" onclick="adminTab('knowledge')">📖 <span data-i18n="tab_knowledge">Knowledge</span></button>
+  </div>
+  <div class="page pad" id="admin-body"></div>
+</section>
+
+<!-- ============ 26 SETTINGS ============ -->
+<section class="screen" id="screen-settings">
+  <header class="topbar"><button class="back" onclick="go('screen-home')">‹</button><h2 data-i18n="settings">Settings</h2></header>
+  <div class="page pad">
+    <button class="set-row" onclick="go('screen-language')">🌐 <span data-i18n="language">Language</span><span class="set-val" id="set-lang-val">English ›</span></button>
+    <div class="set-row">🔊 <span data-i18n="voice">Voice</span>
+      <button class="btn btn-secondary btn-s" id="set-mute" onclick="toggleMute();renderSettings()">🔊 On</button></div>
+    <div class="set-row">💬 <span data-i18n="captions_size">Caption size</span>
+      <div class="seg" id="caption-seg">
+        <button onclick="setCaptionSize('small')">A</button><button class="on" onclick="setCaptionSize('medium')">A+</button><button onclick="setCaptionSize('large')">A++</button>
+      </div></div>
+    <div class="set-row">📍 <span data-i18n="location">Location</span><span class="set-val">Campus Cafeteria ›</span></div>
+    <button class="set-row" onclick="go('screen-insights')">📊 <span data-i18n="insights">Insights</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-admin')">🧑‍💼 <span data-i18n="admin_dash">Admin Dashboard</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-privacy')">🔐 <span data-i18n="privacy">Privacy</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-responsible')">🤖 <span data-i18n="responsible_ai">Responsible AI</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-demo')">🧪 <span data-i18n="demo_info">Demo Mode &amp; Prototype Info</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-help')">❓ <span data-i18n="help">Help</span><span class="set-val">›</span></button>
+    <button class="set-row" onclick="go('screen-about')">ℹ️ <span data-i18n="about">About</span><span class="set-val">›</span></button>
+  </div>
+  <nav class="bottom-nav" data-nav="settings">
+    <button onclick="go('screen-home')">🏠<span data-i18n="nav_home">Home</span></button>
+    <button onclick="go('screen-camera')">📷<span data-i18n="nav_scan">Scan</span></button>
+    <button onclick="go('screen-guide')">🗺️<span data-i18n="nav_guide">Guide</span></button>
+    <button onclick="go('screen-queries')">❓<span data-i18n="nav_queries">Queries</span></button>
+    <button onclick="go('screen-settings')" class="nav-on">⚙️<span data-i18n="nav_settings">Settings</span></button>
+  </nav>
+</section>
+
+<!-- ============ 32 PRIVACY ============ -->
+<section class="screen" id="screen-privacy">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="privacy">Privacy</h2></header>
+  <div class="page pad prose">
+    <p>📷 <span data-i18n="priv1">Camera is used only for waste identification and is not stored by default.</span></p>
+    <p>🎙️ <span data-i18n="priv2">Microphone is used only for voice interaction.</span></p>
+    <p>🕵️ <span data-i18n="priv3">Queries and feedback use anonymous identifiers — no personal information is required.</span></p>
+    <p>🧼 <span data-i18n="priv4">A privacy guard strips phone numbers and email addresses from input.</span></p>
+    <p>🔑 <span data-i18n="priv5">API keys are never exposed to the browser.</span></p>
+    <p>📊 <span data-i18n="priv6">Analytics are aggregated and anonymous.</span></p>
+  </div>
+</section>
+
+<!-- ============ 33 RESPONSIBLE AI ============ -->
+<section class="screen" id="screen-responsible">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="responsible_ai">Responsible AI</h2></header>
+  <div class="page pad prose">
+    <p>✅ <b data-i18n="ra_grounded">Grounded answers</b> — <span data-i18n="ra_grounded_sub">responses come from retrieved local rules, not guesses.</span></p>
+    <p>❓ <b data-i18n="ra_uncertainty">Uncertainty handling</b> — <span data-i18n="ra_uncertainty_sub">WasteWise can say "Not sure" instead of hallucinating.</span></p>
+    <p>🔎 <b data-i18n="ra_transparent">Transparency</b> — <span data-i18n="ra_transparent_sub">every answer shows the matched rule and source.</span></p>
+    <p>👥 <b data-i18n="ra_human">Human verification</b> — <span data-i18n="ra_human_sub">local rules remain authoritative and admin-verifiable.</span></p>
+    <p>♿ <b data-i18n="ra_accessible">Accessibility</b> — <span data-i18n="ra_accessible_sub">captions, voice, text fallback and high-contrast bins.</span></p>
+    <div class="card" id="why-answer"></div>
+  </div>
+</section>
+
+<!-- ============ 34 HELP ============ -->
+<section class="screen" id="screen-help">
+  <header class="topbar"><button class="back" onclick="go('screen-home')">‹</button><h2 data-i18n="help">Help</h2></header>
+  <div class="page pad prose">
+    <p>📷 <b data-i18n="help_scan">How to scan</b><br><span class="muted" data-i18n="help_scan_sub">Open the camera, show your waste in the frame, and tap the scan button.</span></p>
+    <p>🎙️ <b data-i18n="help_voice">How voice works</b><br><span class="muted" data-i18n="help_voice_sub">Tap the microphone and speak naturally — captions show everything.</span></p>
+    <p>🌐 <b data-i18n="help_lang">Change language</b><br><span class="muted" data-i18n="help_lang_sub">Use the 🌐 button — the whole app switches language.</span></p>
+    <p>🤷 <b data-i18n="help_unsure">If AI is unsure</b><br><span class="muted" data-i18n="help_unsure_sub">WasteWise never guesses — it will ask a question or suggest a query.</span></p>
+    <p>❓ <b data-i18n="help_query">Submit a query</b><br><span class="muted" data-i18n="help_query_sub">Open Query Centre to report wrong answers or local-rule mismatches.</span></p>
+    <p>📊 <b data-i18n="help_feedback">How feedback is used</b><br><span class="muted" data-i18n="help_feedback_sub">Anonymous feedback helps institutions improve bins, signs and rules.</span></p>
+  </div>
+</section>
+
+<!-- ============ 35 ABOUT ============ -->
+<section class="screen" id="screen-about">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="about">About</h2></header>
+  <div class="page pad prose center-page">
+    <div class="splash-logo small">♻️</div>
+    <h2>WasteWise AI</h2>
+    <p class="muted" data-i18n="about_purpose">Helping people make better waste-segregation decisions at the moment of disposal.</p>
+    <div class="sdg-card">🎯 <b>SDG 12</b> — <span data-i18n="sdg12">Responsible Consumption and Production</span></div>
+    <p class="muted small" data-i18n="sdg_more">Also aligned with SDG 6 · SDG 11 · SDG 13</p>
+    <p class="muted small" data-i18n="about_mvp">Campus pilot MVP — cafeteria &amp; hostel. Potential impact, pending pilot data.</p>
+  </div>
+</section>
+
+<!-- ============ 36 DEMO / DEPLOYMENT INFO ============ -->
+<section class="screen" id="screen-demo">
+  <header class="topbar"><button class="back" onclick="go('screen-settings')">‹</button><h2 data-i18n="demo_info">Demo Mode &amp; Prototype Info</h2></header>
+  <div class="page pad prose">
+    <div class="demo-note">🧪 <span data-i18n="demo_mode_on">Demo Mode is ON. Mock services are used for Vision, RAG, Granite and Analytics.</span></div>
+    <p>👁 <b>Vision</b> — mock detection (demo item picker)</p>
+    <p>🎤 <b>Speech</b> — Web Speech API where available, simulated otherwise</p>
+    <p>🔎 <b>RAG</b> — local mock semantic retrieval over ~50 item types &amp; 8 internal streams</p>
+    <p>🧠 <b>Granite</b> — MockGraniteService returns structured grounded responses</p>
+    <p>📊 <b>Analytics</b> — demo dataset + local interactions</p>
+    <p>🔌 <b>Real services</b> — VisionService, SpeechToTextService, TextToSpeechService, RAGService, GraniteService, ConversationService, FeedbackService, QueryService, AnalyticsService interfaces ready for production endpoints.</p>
+    <p>📍 <b>QR deployment</b> — open <code>?location=cafeteria</code>, <code>?location=hostel</code> to simulate scanning the QR code beside bins.</p>
+    <p>🗺️ <b>3-bin model</b> — 🟢 Wet · 🔵 Dry · 🔴 Special is a configurable deployment model, not a universal legal standard.</p>
+  </div>
+</section>
+
+<!-- ============ 33b OFFLINE ============ -->
+<section class="screen" id="screen-offline">
+  <div class="page pad center-page">
+    <div class="big-check">📴</div>
+    <h2 data-i18n="offline_title">Limited offline mode</h2>
+    <p class="muted" data-i18n="offline_sub">Local knowledge, Bin Guide and text queries are available. Live AI needs a connection.</p>
+    <button class="btn btn-primary" onclick="go('screen-guide')" data-i18n="open_bin_guide">🗺️ Open Bin Guide</button>
+    <button class="btn btn-secondary" onclick="go('screen-home')" data-i18n="back_home">Back to Home</button>
+  </div>
+</section>
+
+<!-- ============ PIPELINE OVERLAY ============ -->
+<div class="overlay hidden" id="pipeline-overlay">
+  <div class="pipeline-card">
+    <h3 data-i18n="pipeline_title">WasteWise is thinking…</h3>
+    <div id="pipeline-steps"></div>
+  </div>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
