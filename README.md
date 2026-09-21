@@ -8,9 +8,7 @@ WasteWise AI is a **multimodal AI waste-segregation assistant** that helps stude
 **This repository is a high-fidelity, fully navigable MVP prototype.** Real AI services are mocked behind clean service interfaces (Demo Mode) so the entire product loop is demonstrable end-to-end without API keys.
 
 ---
-## 🔗 live production link
-
-### [visit](https://wastewise-ai-h7fi.onrender.com)
+## [ 🔗 live production link     ](https://wastewise-ai-h7fi.onrender.com)
 
 ---
 ## 📌 Problem & Pain Point
